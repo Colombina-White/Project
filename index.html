@@ -26,13 +26,13 @@
         <form id="connect-form" class="card">
           <p class="eyebrow">CONNECTION</p><h2>連接相機</h2>
           <label for="endpoint">WebRTC 串流網址</label>
-          <input id="endpoint" type="url" required placeholder="https://stream.example.com/cam/whep" autocomplete="off" spellcheck="false" aria-describedby="endpoint-help">
-          <p class="help" id="endpoint-help">填入 MediaMTX 的 WHEP 網址，結尾為 <code>/cam/whep</code>。</p>
+          <input id="endpoint" type="url" required value="http://localhost:8889/cam/whep" placeholder="http://localhost:8889/cam/whep" autocomplete="off" spellcheck="false" aria-describedby="endpoint-help">
+          <p class="help" id="endpoint-help">預設連到你自己電腦上的串流服務。請先啟動服務，再按下連接；若瀏覽器詢問本機網路存取權限，請選擇允許。</p>
           <button id="connect" class="primary" type="submit">連接影像 <span>↗</span></button>
           <button id="disconnect" type="button" class="secondary" disabled>中斷連線</button>
           <p id="message" class="message" role="status" aria-live="polite">準備好後，按下「連接影像」。</p>
         </form>
-        <div class="note"><span>↳</span><div><h3>從相機到你的螢幕</h3><p>相機與串流服務需保持開啟。首次設定方式請參閱專案的 README。</p></div></div>
+        <div class="note"><span>↳</span><div><h3>你的電腦，你的相機</h3><p>每位使用者需在自己的電腦啟動串流服務，並連接自己的相機。localhost 代表目前開啟網站的這台裝置。</p></div></div>
       </aside>
     </div>
     <footer><span>CAMERA LINK / 個人影像工作站</span><span>POWERED BY WEBRTC</span></footer>

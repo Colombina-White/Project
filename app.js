@@ -67,15 +67,26 @@ function waitForIce(pc, signal) {
   });
 }
 
+function parseEndpoint(value, pageProtocol) {
+  const endpoint = new URL(value.trim());
+  if (!['http:', 'https:'].includes(endpoint.protocol)) throw new Error('請填入 HTTP 或 HTTPS 的 WHEP 網址。');
+  if (endpoint.username || endpoint.password) throw new Error('請勿在網址內填入帳號或密碼。');
+  // Loopback HTTP is a potentially trustworthy origin. The browser may still
+  // require local-network permission when this player is served over HTTPS.
+  const local = endpoint.hostname === 'localhost' || endpoint.hostname.endsWith('.localhost') ||
+    endpoint.hostname.startsWith('127.') || endpoint.hostname === '[::1]';
+  if (pageProtocol === 'https:' && endpoint.protocol !== 'https:' && !local) {
+    throw new Error('遠端串流請使用 HTTPS；本機串流可使用 http://localhost:8889/cam/whep。');
+  }
+  if (!/\/whep\/?$/.test(endpoint.pathname)) throw new Error('請填入以 /whep 結尾的串流網址，例如 http://localhost:8889/cam/whep。');
+  return endpoint;
+}
+
 $('connect-form').addEventListener('submit', async (event) => {
   event.preventDefault();
   let endpoint;
   try {
-    endpoint = new URL($('endpoint').value.trim());
-    if (!['http:', 'https:'].includes(endpoint.protocol)) throw new Error('請填入 HTTP 或 HTTPS 的 WHEP 網址。');
-    if (endpoint.username || endpoint.password) throw new Error('請勿在網址內填入帳號或密碼。');
-    if (location.protocol === 'https:' && endpoint.protocol !== 'https:') throw new Error('此網站使用 HTTPS，串流網址也必須使用 HTTPS。');
-    if (!/\/whep\/?$/.test(endpoint.pathname)) throw new Error('請填入以 /whep 結尾的串流網址，例如 https://stream.example.com/cam/whep。');
+    endpoint = parseEndpoint($('endpoint').value, location.protocol);
     if (!window.RTCPeerConnection) throw new Error('此瀏覽器不支援 WebRTC，請使用新版 Chrome、Edge、Firefox 或 Safari。');
   } catch (error) { message(error instanceof TypeError ? '串流網址格式不正確。' : error.message, true); return; }
 
@@ -133,7 +144,7 @@ $('connect-form').addEventListener('submit', async (event) => {
     message('已完成協商，正在等待相機影像…');
   } catch (error) {
     if (error.name === 'AbortError') return;
-    fail(connection, error instanceof TypeError ? '無法連線。請確認網址、HTTPS 憑證、串流服務與跨來源（CORS）設定。' : error.message);
+    fail(connection, error instanceof TypeError ? '無法連線。請確認本機串流服務已啟動；若瀏覽器詢問「本機／區域網路存取」，請允許此網站存取。也請檢查網址與 CORS 設定。' : error.message);
   }
 });
 
